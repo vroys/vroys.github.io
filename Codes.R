@@ -151,11 +151,11 @@ ln_rt_intel<-diff(log(data$Intel_AdjClose))-Rf[2:n]
 y = ln_rt_ibm
 n_obs =length(y)
 X = cbind(rep(1, n_obs), ln_rt_snp500) #include an intercept
-XtX = t(X) %*% X
+XtX = crossprod(X)
 n_params = 2
 n_obsby2=n_obs/2
 
-beta_hat = solve(XtX, t(X) %*% y) # compute this beforehand
+beta_hat = solve(XtX, crossprod(X,y)) # compute this beforehand
 XtXi = solve(XtX)
 
 beta = c(0,0) # starting value
@@ -168,8 +168,7 @@ beta_out = matrix(data=NA, nrow=n_iterations, ncol=n_params)
 sigma_out = matrix(data = NA, nrow = n_iterations, ncol=1)
 
 for (i in 1:n_iterations){
-      ymxbeta= (y - X %*% beta)
-     sigma2 = rinvgamma(1, n_obsby2, t(ymxbeta) %*% ymxbeta * .5 ) # draw from sigma2 given beta
+     sigma2 = rinvgamma(1, n_obsby2, sum((y - X %*% beta)^2)*.5 ) # draw from sigma2 given beta
       beta = mvrnorm(n=1, beta_hat, sigma2 * XtXi) # draw from beta given sigma2
 
       ##save iterations
